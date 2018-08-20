@@ -1,0 +1,6 @@
+
+*.attr_table
+*.count_table
+*.fpkm_table
+*.table
+*.info
