@@ -5,3 +5,12 @@
 *.table
 *.info
 .Rproj.user
+*.h5
+*.tsv
+*.json
+*.csv
+*.csv
+.Rhistory
+.RData
+.Rhistory
+.RData
