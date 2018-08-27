@@ -54,12 +54,90 @@ colnames(MCF7) <- c('ensembl_gene_id', 'MCF7_NT1', 'MCF7_NT2', 'MCF7_NT3', 'MCF7
 write.csv(MCF7, file="MCF7.csv", row.names = FALSE)
 
 
-# kallisto solution
+# kallisto solution PC3 Verify
 PC3NT1 <- read.table("VerifyPC3/kallistoResult2_NT1/abundance.tsv", header = TRUE)
 PC3NT2 <- read.table("VerifyPC3/kallistoResult2_NT2/abundance.tsv", header = TRUE)
 PC3NT3 <- read.table("VerifyPC3/kallistoResult2_NT3/abundance.tsv", header = TRUE)
 PC3TR1 <- read.table("VerifyPC3/kallistoResult2_TR1/abundance.tsv", header = TRUE)
 PC3TR2 <- read.table("VerifyPC3/kallistoResult2_TR2/abundance.tsv", header = TRUE)
 PC3TR3 <- read.table("VerifyPC3/kallistoResult2_TR3/abundance.tsv", header = TRUE)
+
+
+PC3NT1 <- PC3NT1 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3NT1)[2] <- 'PC3NT1'
+PC3NT2 <- PC3NT2 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3NT2)[2] <- 'PC3NT2'
+PC3NT3 <- PC3NT3 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3NT3)[2] <- 'PC3NT3'
+PC3TR1 <- PC3TR1 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3TR1)[2] <- 'PC3TR1'
+PC3TR2 <- PC3TR2 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3TR2)[2] <- 'PC3TR2'
+PC3TR3 <- PC3TR3 %>%
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(PC3TR3)[2] <- 'PC3TR3'
+
+PC3Result <- full_join(
+                full_join(  full_join(PC3NT1,PC3NT2, by='target_id'),
+                            full_join(PC3NT3,PC3TR1, by='target_id'),
+                            by='target_id'
+                          ),
+                full_join(  PC3TR2, PC3TR3, by='target_id' ),
+                by='target_id')
+
+PC3Result$target_id <- sub("[.].*", "", as.character( PC3Result$target_id) )
+
+length(unique(PC3Result$target_id))
+
+write.csv(PC3Result, file="PC3Verify.csv", row.names = FALSE)
+
+
+# kallisto solution MCF7 Verify
+MCF7NT1 <- read.table("VerifyMCF7/kallistoResult_NT1/abundance.tsv", header = TRUE)
+MCF7NT2 <- read.table("VerifyMCF7/kallistoResult_NT2/abundance.tsv", header = TRUE)
+MCF7NT3 <- read.table("VerifyMCF7/kallistoResult_NT3/abundance.tsv", header = TRUE)
+MCF7TR1 <- read.table("VerifyMCF7/kallistoResult_TR1/abundance.tsv", header = TRUE)
+MCF7TR2 <- read.table("VerifyMCF7/kallistoResult_TR2/abundance.tsv", header = TRUE)
+MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TRUE)
+
+
+MCF7NT1 <- MCF7NT1 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7NT1)[2] <- 'MCF7NT1'
+MCF7NT2 <- MCF7NT2 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7NT2)[2] <- 'MCF7NT2'
+MCF7NT3 <- MCF7NT3 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7NT3)[2] <- 'MCF7NT3'
+MCF7TR1 <- MCF7TR1 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7TR1)[2] <- 'MCF7TR1'
+MCF7TR2 <- MCF7TR2 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7TR2)[2] <- 'MCF7TR2'
+MCF7TR3 <- MCF7TR3 %>% 
+  select(one_of('target_id', 'tpm'))  ## NOTE: we are using transcript per million (TPM) here.
+names(MCF7TR3)[2] <- 'MCF7TR3'
+
+
+MCF7Result <- full_join(
+  full_join(  full_join(MCF7NT1,MCF7NT2, by='target_id'),
+              full_join(MCF7NT3,MCF7TR1, by='target_id'),
+              by='target_id'
+  ),
+  full_join(  MCF7TR2, MCF7TR3, by='target_id' ),
+  by='target_id')
+
+MCF7Result$target_id <- sub("[.].*", "", as.character( MCF7Result$target_id) )
+
+
+write.csv(MCF7Result, file="MCF7Verify.csv", row.names = FALSE)
+
 
 
