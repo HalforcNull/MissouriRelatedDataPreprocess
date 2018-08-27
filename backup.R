@@ -139,5 +139,8 @@ MCF7Result$target_id <- sub("[.].*", "", as.character( MCF7Result$target_id) )
 
 write.csv(MCF7Result, file="MCF7Verify.csv", row.names = FALSE)
 
+source("https://bioconductor.org/biocLite.R")
+biocLite("DESeq2")
+library('DESeq2')
 
 
