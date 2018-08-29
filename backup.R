@@ -139,8 +139,89 @@ MCF7Result$target_id <- sub("[.].*", "", as.character( MCF7Result$target_id) )
 
 write.csv(MCF7Result, file="MCF7Verify.csv", row.names = FALSE)
 
+
+
+# DESeq2
 source("https://bioconductor.org/biocLite.R")
 biocLite("DESeq2")
+biocLite("tximport")
+biocLite("tximportData")
+biocLite("ensembldb")
 library('DESeq2')
+library("tximport")
+library("readr")
+library("tximportData")
+library("ensembldb")
+
+
+MCF7NT1 <- read.table("VerifyMCF7/kallistoResult_NT1/abundance.tsv", header = TRUE)
+MCF7NT2 <- read.table("VerifyMCF7/kallistoResult_NT2/abundance.tsv", header = TRUE)
+MCF7NT3 <- read.table("VerifyMCF7/kallistoResult_NT3/abundance.tsv", header = TRUE)
+MCF7TR1 <- read.table("VerifyMCF7/kallistoResult_TR1/abundance.tsv", header = TRUE)
+MCF7TR2 <- read.table("VerifyMCF7/kallistoResult_TR2/abundance.tsv", header = TRUE)
+MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TRUE)
+
+
+# dir <- system.file("extdata", package="tximportData")
+# samples <- read.table(file.path(dir,"samples.txt"), header=TRUE)
+# 
+# ensembldb::m
+# 
+# 
+# library(EnsDb.Hsapiens.v86)
+# transcripts(x, columns = listColumns(x, "tx"),
+#             filter = AnnotationFilterList(),
+#             return.type = "data.frame")
+# 
+# 
+# 
+# library(AnnotationHub)
+# ah <- AnnotationHub()
+# query(ah, "EnsDb.Hsapiens")
+# 
+# edb <-ah[['AH60977']]
+# txs <- transcripts(edb, return.type = "DataFrame")
+# k <- keys(edb, keytype = "TXNAME")
+# tx2gene <- AnnotationDbi::select(txs, k, 'gene_id', 'tx_name')
+# 
+# head(txs)
+
+library(EnsDb.Hsapiens.v86)
+library(AnnotationDbi)
+esdb <- EnsDb.Hsapiens.v86
+newtxs <- transcripts(esdb, return.type = 'data.frame')
+k <- keys(esdb, keytype = "TXNAME")
+tx2gene <- dplyr::select(newtxs, one_of(c('tx_name', 'gene_id')))
+colnames(tx2gene) <- c('TXNAME', 'GENEID')
+
+txi.kallisto.tsv <- tximport("VerifyMCF7/kallistoResult_TR3/abundance.tsv", type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
+
+files <- c(
+  'VerifyMCF7/kallistoResult_NT1/abundance.tsv',
+  'VerifyMCF7/kallistoResult_NT2/abundance.tsv',
+  'VerifyMCF7/kallistoResult_NT3/abundance.tsv',
+  'VerifyMCF7/kallistoResult_TR1/abundance.tsv',
+  'VerifyMCF7/kallistoResult_TR2/abundance.tsv',
+  'VerifyMCF7/kallistoResult_TR3/abundance.tsv')
+names(files) <- c('MCF7NT1','MCF7NT2','MCF7NT3','MCF7TR1','MCF7TR2','MCF7TR3')
+
+
+txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="MCF7Verify_2.csv", row.names = TRUE)
+
+
+
+
+################################################################################################
+#########################           Paper reading         ######################################
+################################################################################################
+
+source("https://bioconductor.org/biocLite.R")
+biocLite("debrowser")
+library('debrowser')
+
+
+
+runDE()
 
 
