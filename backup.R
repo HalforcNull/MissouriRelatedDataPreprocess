@@ -185,16 +185,18 @@ MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TR
 # tx2gene <- AnnotationDbi::select(txs, k, 'gene_id', 'tx_name')
 # 
 # head(txs)
-
+source("https://bioconductor.org/biocLite.R")
+biocLite("tximport")
 library(EnsDb.Hsapiens.v86)
 library(AnnotationDbi)
+library(dplyr)
 esdb <- EnsDb.Hsapiens.v86
 newtxs <- transcripts(esdb, return.type = 'data.frame')
 k <- keys(esdb, keytype = "TXNAME")
 tx2gene <- dplyr::select(newtxs, one_of(c('tx_name', 'gene_id')))
 colnames(tx2gene) <- c('TXNAME', 'GENEID')
-
-txi.kallisto.tsv <- tximport("VerifyMCF7/kallistoResult_TR3/abundance.tsv", type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
+# 
+# txi.kallisto.tsv <- tximport("VerifyMCF7/kallistoResult_TR3/abundance.tsv", type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
 
 files <- c(
   'VerifyMCF7/kallistoResult_NT1/abundance.tsv',
@@ -208,6 +210,19 @@ names(files) <- c('MCF7NT1','MCF7NT2','MCF7NT3','MCF7TR1','MCF7TR2','MCF7TR3')
 
 txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
 write.csv(txi.kallisto.tsv$counts, file="MCF7Verify_2.csv", row.names = TRUE)
+
+
+files <-c(
+  'VerifyPC3/kallistoResult2_NT1/abundance.tsv',
+  'VerifyPC3/kallistoResult2_NT2/abundance.tsv',
+  'VerifyPC3/kallistoResult2_NT3/abundance.tsv',
+  'VerifyPC3/kallistoResult2_TR1/abundance.tsv',
+  'VerifyPC3/kallistoResult2_TR2/abundance.tsv',
+  'VerifyPC3/kallistoResult2_TR3/abundance.tsv')
+names(files) <- c('PC3NT1','PC3NT2','PC3NT3','PC3TR1','PC3TR2','PC3TR3')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="PC3Verify_2.csv", row.names = TRUE)
 
 
 
