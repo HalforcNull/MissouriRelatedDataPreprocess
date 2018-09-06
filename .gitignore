@@ -28,3 +28,9 @@ Deliver Package/Missouri Data Source Target Cell Line Overall Report/GO Cellular
 Deliver Package/Missouri Data Source Target Cell Line Overall Report/GO Biological Process Enrichment Tree.tiff
 Deliver Package/Missouri Data Source Target Cell Line Overall Report/GO Biological Process Enrichment Network.png
 Deliver Package/Missouri Data Source Target Cell Line Overall Report/Down Gene List.txt
+*.txt
+*.png
+*.tiff
+Import Kallisto Data/ImportKallistoTest/ui.R
+Import Kallisto Data/ImportKallistoTest/server.R
+checklistsolution/app.R
