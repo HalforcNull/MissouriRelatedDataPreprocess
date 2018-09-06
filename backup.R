@@ -222,7 +222,195 @@ files <-c(
 names(files) <- c('PC3NT1','PC3NT2','PC3NT3','PC3TR1','PC3TR2','PC3TR3')
 
 txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
-write.csv(txi.kallisto.tsv$counts, file="PC3Verify_2.csv", row.names = TRUE)
+write.csv(txi.kallisto.tsv$counts, file="PC3(Kallisto).csv", row.names = TRUE)
+
+
+
+files <-c('kallistoPC3M_NT1/abundance.tsv',
+'kallistoPC3M_NT2/abundance.tsv',
+'kallistoPC3M_NT3/abundance.tsv',
+'kallistoPC3M_TR1/abundance.tsv',
+'kallistoPC3M_TR2/abundance.tsv',
+'kallistoPC3M_TR3/abundance.tsv')
+names(files) <- c('PC3MNT1','PC3MNT2','PC3MNT3','PC3MTR1','PC3MTR2','PC3MTR3')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="PC3M(Kallisto).csv", row.names = TRUE)
+
+
+files <-c('kallistoRW_NT1/abundance.tsv',
+          'kallistoRW_NT2/abundance.tsv',
+          'kallistoRW_NT3/abundance.tsv',
+          'kallistoRW_TR1/abundance.tsv',
+          'kallistoRW_TR2/abundance.tsv',
+          'kallistoRW_TR3/abundance.tsv')
+names(files) <- c('RWNT1','RWNT2','RWNT3','RWTR1','RWTR2','RWTR3')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="RW(Kallisto).csv", row.names = TRUE)
+
+
+files <-c('kallistoTRAMP_NT1/abundance.tsv',
+          'kallistoTRAMP_NT2/abundance.tsv',
+          'kallistoTRAMP_NT3/abundance.tsv',
+          'kallistoTRAMP_TR1/abundance.tsv',
+          'kallistoTRAMP_TR2/abundance.tsv',
+          'kallistoTRAMP_TR3/abundance.tsv')
+names(files) <- c('TRAMPNT1','TRAMPNT2','TRAMPNT3','TRAMPTR1','TRAMPTR2','TRAMPTR3')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="TRAMP(Kallisto).csv", row.names = TRUE)
+
+files <-c('kallistoPC3M_NT1/abundance.tsv',
+          'kallistoPC3M_NT2/abundance.tsv',
+          'kallistoPC3M_NT3/abundance.tsv',
+          'kallistoPC3M_TR1/abundance.tsv',
+          'kallistoPC3M_TR2/abundance.tsv',
+          'kallistoPC3M_TR3/abundance.tsv')
+names(files) <- c('PC3MNT1','PC3MNT2','PC3MNT3','PC3MTR1','PC3MTR2','PC3MTR3')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="PC3M(Kallisto).csv", row.names = TRUE)
+
+
+
+# hTERT 13-18
+SampleName = 'hTERT'
+files <- NULL
+for(i in 13:18){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+
+# PANC 19-24
+SampleName = 'PANC'
+files <- NULL
+for(i in 19:24){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+# HT29 25-30
+SampleName = 'HT29'
+files <- NULL
+for(i in 25:30){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+# CCD18 31-36
+SampleName = 'CCD18'
+files <- NULL
+for(i in 31:36){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+
+# HEM 37-42
+SampleName = 'HEM'
+files <- NULL
+for(i in 37:42){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+# C32 43-48
+SampleName = 'C32'
+files <- NULL
+for(i in 43:48){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+# 184A1 1-6
+SampleName = '184A1'
+files <- NULL
+for(i in 1:6){
+  files <- c(files, paste0('kallistoResult_', as.character(i), '/abundance.tsv'))
+}
+names(files) <- c(paste0(SampleName, 'NT1'), paste0(SampleName, 'NT2'), paste0(SampleName, 'NT3'),
+                  paste0(SampleName, 'TR1'), paste0(SampleName, 'TR2'), paste0(SampleName, 'TR3'))
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), row.names = TRUE)
+
+
+
+
+#################==============             targets vs. non-targets               ===================
+###       This would mean finding DEG/pathways that are co-deregulated in Tramp, PC3, PC3M, and MCF cells but not in the rest of the samples
+
+######  Missouri  Data
+
+###### PC3, PC3M, Tramp vs RW (PC3S3 are excluded)
+###### PC3M, Tramp vs RW 
+
+
+
+files <-c(
+  'VerifyPC3/kallistoResult2_NT1/abundance.tsv',
+  'VerifyPC3/kallistoResult2_NT2/abundance.tsv',
+  'kallistoPC3M_NT1/abundance.tsv',
+  'kallistoPC3M_NT2/abundance.tsv',
+  'kallistoPC3M_NT3/abundance.tsv',
+  'kallistoTRAMP_NT1/abundance.tsv',
+  'kallistoTRAMP_NT2/abundance.tsv',
+  'kallistoTRAMP_NT3/abundance.tsv',
+  
+  
+  'VerifyPC3/kallistoResult2_TR1/abundance.tsv',
+  'VerifyPC3/kallistoResult2_TR2/abundance.tsv',
+  'kallistoPC3M_TR1/abundance.tsv',
+  'kallistoPC3M_TR2/abundance.tsv',
+  'kallistoPC3M_TR3/abundance.tsv',
+  'kallistoTRAMP_TR1/abundance.tsv',
+  'kallistoTRAMP_TR2/abundance.tsv',
+  'kallistoTRAMP_TR3/abundance.tsv')
+names(files) <- c('TPP_NT1','TPP_NT2','TPP_NT3','TPP_NT4','TPP_NT5','TPP_NT6','TPP_NT7','TPP_NT8',
+                  'TPP_TR1','TPP_TR2','TPP_TR3','TPP_TR4','TPP_TR5','TPP_TR6','TPP_TR7','TPP_TR8')
+
+txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
+write.csv(txi.kallisto.tsv$counts, file="MissouriTarget(Kallisto).csv", row.names = TRUE)
+
+
+#names(files) <- c('PC3NT1','PC3NT2','PC3TR1','PC3TR2','PC3MNT1','PC3MNT2','PC3MNT3','PC3MTR1','PC3MTR2','PC3MTR3',
+#                  'TRAMPNT1','TRAMPNT2','TRAMPNT3','TRAMPTR1','TRAMPTR2','TRAMPTR3')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
