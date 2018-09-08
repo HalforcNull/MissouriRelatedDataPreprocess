@@ -1,7 +1,21 @@
 
 source("https://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
+biocLite("tximport")
+biocLite("EnsDb.Hsapiens.v86")
+biocLite("DESeq2")
+biocLite("tximport")
+biocLite("tximportData")
+biocLite("ensembldb")
 library(biomaRt)
+library(dplyr)
+library('DESeq2')
+library("tximport")
+library("readr")
+library("tximportData")
+library("ensembldb")
+library(EnsDb.Hsapiens.v86)
+library(AnnotationDbi)
 library(dplyr)
 
 # tophat+cufflink solution
@@ -142,16 +156,7 @@ write.csv(MCF7Result, file="MCF7Verify.csv", row.names = FALSE)
 
 
 # DESeq2
-source("https://bioconductor.org/biocLite.R")
-biocLite("DESeq2")
-biocLite("tximport")
-biocLite("tximportData")
-biocLite("ensembldb")
-library('DESeq2')
-library("tximport")
-library("readr")
-library("tximportData")
-library("ensembldb")
+
 
 
 MCF7NT1 <- read.table("VerifyMCF7/kallistoResult_NT1/abundance.tsv", header = TRUE)
@@ -185,11 +190,8 @@ MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TR
 # tx2gene <- AnnotationDbi::select(txs, k, 'gene_id', 'tx_name')
 # 
 # head(txs)
-source("https://bioconductor.org/biocLite.R")
-biocLite("tximport")
-library(EnsDb.Hsapiens.v86)
-library(AnnotationDbi)
-library(dplyr)
+
+
 esdb <- EnsDb.Hsapiens.v86
 newtxs <- transcripts(esdb, return.type = 'data.frame')
 k <- keys(esdb, keytype = "TXNAME")
@@ -209,7 +211,7 @@ names(files) <- c('MCF7NT1','MCF7NT2','MCF7NT3','MCF7TR1','MCF7TR2','MCF7TR3')
 
 
 txi.kallisto.tsv <- tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
-write.csv(txi.kallisto.tsv$counts, file="MCF7Verify_2.csv", row.names = TRUE)
+write.csv(txi.kallisto.tsv$counts, file="MCF7(Kallisto).csv", row.names = TRUE)
 
 
 files <-c(
@@ -524,14 +526,10 @@ write.csv(txi.kallisto.tsv$counts, file=paste0(SampleName, "(Kallisto).csv"), ro
 
 
 
-
-
-
-
 #names(files) <- c('PC3NT1','PC3NT2','PC3TR1','PC3TR2','PC3MNT1','PC3MNT2','PC3MNT3','PC3MTR1','PC3MTR2','PC3MTR3',
 #                  'TRAMPNT1','TRAMPNT2','TRAMPNT3','TRAMPTR1','TRAMPTR2','TRAMPTR3')
 
-
+{
 upListInTarget <- c("ENSG00000100906",
                     "ENSG00000144802",
                     "ENSG00000163874",
@@ -1012,7 +1010,7 @@ DownListInNonTarget <- c("ENSG00000136111",
                          "ENSG00000125804",
                          "ENSG00000261360",
                          "ENSG00000225920")
-
+}
 
 upGeneOnlyInTarget <- upListInTarget[!upListInTarget%in%upListInNonTarget]
 downGeneOnlyInTarget <- DownListInTarget[!DownListInTarget%in%DownListInNonTarget]
@@ -1024,6 +1022,47 @@ downGeneOnlyInNonTarget <- DownListInNonTarget[!DownListInNonTarget%in%DownListI
 
 writeClipboard(paste(upGeneOnlyInTarget, sep = '\t'))
 writeClipboard(paste(downGeneOnlyInTarget, sep = '\t'))
+
+
+#================       Report All Data together      =======================
+
+
+# 
+tb184A1 <- read.csv('184A1(Kallisto).csv')
+tbC32 <- read.csv('C32(Kallisto).csv')
+tbCCD18 <- read.csv('CCD18(Kallisto).csv')
+tbHEM <- read.csv('HEM(Kallisto).csv')
+tbHT29 <- read.csv('HT29(Kallisto).csv')
+tbhTERT <- read.csv('hTERT(Kallisto).csv')
+tbMCF7 <- read.csv('MCF7(Kallisto).csv')
+PANC <- read.csv('PANC(Kallisto).csv')
+
+PC3 <- read.csv('PC3(Kallisto).csv')
+PC3M <- read.csv('PC3M(Kallisto).csv')
+RW <- read.csv('RW(Kallisto).csv')
+TRAMP <- read.csv('TRAMP(Kallisto).csv')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
