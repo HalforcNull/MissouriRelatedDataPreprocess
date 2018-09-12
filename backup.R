@@ -3,6 +3,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("biomaRt")
 biocLite("tximport")
 biocLite("EnsDb.Hsapiens.v86")
+biocLite("EnsDb.Mmusculus.v79")
 biocLite("DESeq2")
 biocLite("tximport")
 biocLite("tximportData")
@@ -15,6 +16,7 @@ library("readr")
 library("tximportData")
 library("ensembldb")
 library(EnsDb.Hsapiens.v86)
+library(EnsDb.Mmusculus.v79)
 library(AnnotationDbi)
 library(dplyr)
 
@@ -193,6 +195,7 @@ MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TR
 
 
 esdb <- EnsDb.Hsapiens.v86
+esmousedb <- EnsDb.
 newtxs <- transcripts(esdb, return.type = 'data.frame')
 k <- keys(esdb, keytype = "TXNAME")
 tx2gene <- dplyr::select(newtxs, one_of(c('tx_name', 'gene_id')))

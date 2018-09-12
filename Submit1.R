@@ -152,7 +152,11 @@ AllDEGResult <-
     ),
     by='Gene'
   )
+nameCol <- colnames(AllDEGResult)
+nameCol <- nameCol[grepl("__", nameCol)]
+nameCol <- c('Gene', 'Symbol_184A1', nameCol)
+AllDEGResult <- dplyr::select(AllDEGResult, one_of(nameCol))
 
-write.csv(AllReadCountTable, file='Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv')
+write.csv(AllDEGResult, file='Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv')
 
 
