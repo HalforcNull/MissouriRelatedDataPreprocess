@@ -1,13 +1,13 @@
 
-source("https://bioconductor.org/biocLite.R")
-biocLite("biomaRt")
-biocLite("tximport")
-biocLite("EnsDb.Hsapiens.v86")
-biocLite("EnsDb.Mmusculus.v79")
-biocLite("DESeq2")
-biocLite("tximport")
-biocLite("tximportData")
-biocLite("ensembldb")
+#source("https://bioconductor.org/biocLite.R")
+# biocLite("biomaRt")
+# biocLite("tximport")
+# biocLite("EnsDb.Hsapiens.v86")
+# biocLite("EnsDb.Mmusculus.v79")
+# biocLite("DESeq2")
+# biocLite("tximport")
+# biocLite("tximportData")
+# biocLite("ensembldb")
 library(biomaRt)
 library(dplyr)
 library('DESeq2')
@@ -19,6 +19,16 @@ library(EnsDb.Hsapiens.v86)
 library(EnsDb.Mmusculus.v79)
 library(AnnotationDbi)
 library(dplyr)
+
+# Kallisto pre request data
+
+esdb <- EnsDb.Hsapiens.v86
+
+newtxs <- transcripts(esdb, return.type = 'data.frame')
+k <- keys(esdb, keytype = "TXNAME")
+tx2gene <- dplyr::select(newtxs, one_of(c('tx_name', 'gene_id')))
+colnames(tx2gene) <- c('TXNAME', 'GENEID')
+
 
 # tophat+cufflink solution
 
@@ -194,12 +204,6 @@ MCF7TR3 <- read.table("VerifyMCF7/kallistoResult_TR3/abundance.tsv", header = TR
 # head(txs)
 
 
-esdb <- EnsDb.Hsapiens.v86
-esmousedb <- EnsDb.
-newtxs <- transcripts(esdb, return.type = 'data.frame')
-k <- keys(esdb, keytype = "TXNAME")
-tx2gene <- dplyr::select(newtxs, one_of(c('tx_name', 'gene_id')))
-colnames(tx2gene) <- c('TXNAME', 'GENEID')
 # 
 # txi.kallisto.tsv <- tximport("VerifyMCF7/kallistoResult_TR3/abundance.tsv", type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE)
 
@@ -218,13 +222,18 @@ write.csv(txi.kallisto.tsv$counts, file="MCF7(Kallisto).csv", row.names = TRUE)
 
 
 files <-c(
-  'VerifyPC3/kallistoResult2_NT1/abundance.tsv',
-  'VerifyPC3/kallistoResult2_NT2/abundance.tsv',
-  'VerifyPC3/kallistoResult2_NT3/abundance.tsv',
-  'VerifyPC3/kallistoResult2_TR1/abundance.tsv',
-  'VerifyPC3/kallistoResult2_TR2/abundance.tsv',
-  'VerifyPC3/kallistoResult2_TR3/abundance.tsv')
-names(files) <- c('PC3NT1','PC3NT2','PC3NT3','PC3TR1','PC3TR2','PC3TR3')
+  'Missouri_kallisto/kallistoPC3_NT1/abundance.tsv',
+  'Missouri_kallisto/kallistoPC3_NT2/abundance.tsv',
+  #'Missouri_kallisto/kallistoPC3_NT3/abundance.tsv',
+  'Missouri_kallisto/kallistoPC3_TR1/abundance.tsv',
+  'Missouri_kallisto/kallistoPC3_TR2/abundance.tsv'
+  #,'Missouri_kallisto/kallistoPC3_TR3/abundance.tsv'
+  )
+names(files) <- c('PC3NT1','PC3NT2',
+                  #'PC3NT3',
+                  'PC3TR1','PC3TR2'
+                  #,'PC3TR3'
+                  )
 
 txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
 write.csv(txi.kallisto.tsv$counts, file="PC3(Kallisto).csv", row.names = TRUE)
@@ -243,13 +252,16 @@ txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2ge
 write.csv(txi.kallisto.tsv$counts, file="PC3M(Kallisto).csv", row.names = TRUE)
 
 
-files <-c('kallistoRW_NT1/abundance.tsv',
-          'kallistoRW_NT2/abundance.tsv',
-          'kallistoRW_NT3/abundance.tsv',
-          'kallistoRW_TR1/abundance.tsv',
-          'kallistoRW_TR2/abundance.tsv',
-          'kallistoRW_TR3/abundance.tsv')
-names(files) <- c('RWNT1','RWNT2','RWNT3','RWTR1','RWTR2','RWTR3')
+files <-c(#'kallistoRW_NT1/abundance.tsv',
+          'Missouri_kallisto/kallistoRW_NT2/abundance.tsv',
+          'Missouri_kallisto/kallistoRW_NT3/abundance.tsv',
+          #'kallistoRW_TR1/abundance.tsv',
+          'Missouri_kallisto/kallistoRW_TR2/abundance.tsv',
+          'Missouri_kallisto/kallistoRW_TR3/abundance.tsv')
+names(files) <- c(#'RWNT1',
+                  'RWNT2','RWNT3',
+                  #'RWTR1',
+                  'RWTR2','RWTR3')
 
 txi.kallisto.tsv <- tximport::tximport(files, type = "kallisto", tx2gene = tx2gene, ignoreAfterBar = TRUE, ignoreTxVersion=TRUE )
 write.csv(txi.kallisto.tsv$counts, file="RW(Kallisto).csv", row.names = TRUE)
