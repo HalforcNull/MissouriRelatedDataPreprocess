@@ -1,0 +1,91 @@
+---
+title: "Submit2"
+author: "Runan Yao"
+date: "October 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+### Read data
+```{r}
+allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv")
+colnames(allDegResult)
+```
+
+
+
+### Preprocess
+1. Regroup
+```{r}
+allNames <- colnames(allDegResult)
+expGroupNames <- c( 'XPC3TR.XPC3NT___log2FoldChange', 
+                    'XPC3TR.XPC3NT___padj',
+                    'XPC3MTR.XPC3MNT___log2FoldChange',
+                    'XPC3MTR.XPC3MNT___padj',
+                    'XMCF7TR.XMCF7NT___log2FoldChange',
+                    'XMCF7TR.XMCF7NT___padj')
+ExpGroup <- allDegResult %>% 
+  select(one_of( c( 'Gene',expGroupNames)))
+
+colnames(ExpGroup) <- c('Gene', 
+                        'Exp_LFC_1', 'Exp_Alpha_1', 
+                        'Exp_LFC_2', 'Exp_Alpha_2', 
+                        'Exp_LFC_3', 'Exp_Alpha_3')
+sampleNames.Exp <- c('PC3','PC3M','MCF7')
+
+CtrlGroup <- allDegResult %>%
+  select(one_of(setdiff( allNames, c(expGroupNames, c('X', 'Symbol_184A1', 'XTRAMPTR.XTRAMPNT___log2FoldChange', 'XTRAMPTR.XTRAMPNT___padj')))))
+
+colnames(CtrlGroup) <- c('Gene', 
+                         'CTRL_LFC_1', 'CTRL_Alpha_1', 
+                         'CTRL_LFC_2', 'CTRL_Alpha_2', 
+                         'CTRL_LFC_3', 'CTRL_Alpha_3',
+                         'CTRL_LFC_4', 'CTRL_Alpha_4',
+                         'CTRL_LFC_5', 'CTRL_Alpha_5',
+                         'CTRL_LFC_6', 'CTRL_Alpha_6',
+                         'CTRL_LFC_7', 'CTRL_Alpha_7',
+                         'CTRL_LFC_8', 'CTRL_Alpha_8')
+sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', 'RW') 
+
+```
+
+2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
+```{r}
+ourThreshold <- 0.0001
+keepOrNot <- function(alpha, threshold){
+  return(
+    ifelse(is.na(alpha), 
+           0, 
+           ifelse(alpha < threshold, 
+                  1, 
+                  0)
+           )
+    )
+}
+
+Exp1 <- ExpGroup$Exp_LFC_1 * keepOrNot(ExpGroup$Exp_Alpha_1, threshold = ourThreshold)
+Exp2 <- ExpGroup$Exp_LFC_2 * keepOrNot(ExpGroup$Exp_Alpha_2, threshold = ourThreshold)
+Exp3 <- ExpGroup$Exp_LFC_3 * keepOrNot(ExpGroup$Exp_Alpha_3, threshold = ourThreshold)
+
+Ctrl1 <- CtrlGroup$CTRL_LFC_1 * keepOrNot(CtrlGroup$CTRL_Alpha_1, threshold = ourThreshold)
+Ctrl2 <- CtrlGroup$CTRL_LFC_2 * keepOrNot(CtrlGroup$CTRL_Alpha_2, threshold = ourThreshold)
+Ctrl3 <- CtrlGroup$CTRL_LFC_3 * keepOrNot(CtrlGroup$CTRL_Alpha_3, threshold = ourThreshold)
+Ctrl4 <- CtrlGroup$CTRL_LFC_4 * keepOrNot(CtrlGroup$CTRL_Alpha_4, threshold = ourThreshold)
+Ctrl5 <- CtrlGroup$CTRL_LFC_5 * keepOrNot(CtrlGroup$CTRL_Alpha_5, threshold = ourThreshold)
+Ctrl6 <- CtrlGroup$CTRL_LFC_6 * keepOrNot(CtrlGroup$CTRL_Alpha_6, threshold = ourThreshold)
+Ctrl7 <- CtrlGroup$CTRL_LFC_7 * keepOrNot(CtrlGroup$CTRL_Alpha_7, threshold = ourThreshold)
+Ctrl8 <- CtrlGroup$CTRL_LFC_8 * keepOrNot(CtrlGroup$CTRL_Alpha_8, threshold = ourThreshold)
+
+length(Exp1)
+LFCTable <- cbind(Exp1,Exp2,Exp3,Ctrl1,Ctrl2,Ctrl3,Ctrl4,Ctrl5,Ctrl6,Ctrl7,Ctrl8)
+
+dim(LFCTable)
+rownames(LFCTable) <- ExpGroup$Gene
+colnames(LFCTable) <- c('Exp_1','Exp_2','Exp_3','Ctrl_1','Ctrl_2','Ctrl_3','Ctrl_4','Ctrl_5','Ctrl_6','Ctrl_7','Ctrl_8')
+write.csv(LFCTable, file='Phase_2_Result/Filtered_LFC_Result.csv')
+
+```
