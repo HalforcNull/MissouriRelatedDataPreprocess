@@ -12,7 +12,7 @@ library(dplyr)
 
 ### Read data
 ```{r}
-allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv")
+allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv", stringsAsFactors = FALSE)
 colnames(allDegResult)
 ```
 
@@ -81,11 +81,19 @@ Ctrl7 <- CtrlGroup$CTRL_LFC_7 * keepOrNot(CtrlGroup$CTRL_Alpha_7, threshold = ou
 Ctrl8 <- CtrlGroup$CTRL_LFC_8 * keepOrNot(CtrlGroup$CTRL_Alpha_8, threshold = ourThreshold)
 
 length(Exp1)
-LFCTable <- cbind(Exp1,Exp2,Exp3,Ctrl1,Ctrl2,Ctrl3,Ctrl4,Ctrl5,Ctrl6,Ctrl7,Ctrl8)
+LFCTable <- cbind(ExpGroup$Gene, Exp1,Exp2,Exp3,Ctrl1,Ctrl2,Ctrl3,Ctrl4,Ctrl5,Ctrl6,Ctrl7,Ctrl8) 
 
 dim(LFCTable)
-rownames(LFCTable) <- ExpGroup$Gene
-colnames(LFCTable) <- c('Exp_1','Exp_2','Exp_3','Ctrl_1','Ctrl_2','Ctrl_3','Ctrl_4','Ctrl_5','Ctrl_6','Ctrl_7','Ctrl_8')
-write.csv(LFCTable, file='Phase_2_Result/Filtered_LFC_Result.csv')
+colnames(LFCTable) <- c('Gene', 'Exp_1','Exp_2','Exp_3','Ctrl_1','Ctrl_2','Ctrl_3','Ctrl_4','Ctrl_5','Ctrl_6','Ctrl_7','Ctrl_8')
+LFCTable[is.na(LFCTable)] <- 0
+write.csv(LFCTable, file='Phase_2_Result/Filtered_LFC_Result.csv', row.names = FALSE)
+LFCTable <- as.data.frame(LFCTable, stringsAsFactors = FALSE)
+
+```
+
+
+### all up gre in EXP
+```{r}
+which(LFCTable$)
 
 ```
