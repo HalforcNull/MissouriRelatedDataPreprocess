@@ -74,7 +74,7 @@ write.csv(AllReadCountTable, file='Phase_1_Result/AllReadCount.csv')
 AllProjectXut <- AllReadCountTable[,1:49]
 write.csv(AllProjectXut, file='Phase_1_Result/AllProjectXut.csv')
 
-AllMissouri <- AllReadCountTable[,c(1, 50:73)]
+AllMissouri <- AllReadCountTable[,c(1, 50:69)]
 write.csv(AllMissouri, file='Phase_1_Result/AllMissouri.csv')
 
 
