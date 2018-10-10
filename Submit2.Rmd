@@ -55,7 +55,7 @@ sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', '
 
 2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
 ```{r}
-ourThreshold <- 0.0001
+ourThreshold <- 0.1
 keepOrNot <- function(alpha, threshold){
   return(
     ifelse(is.na(alpha), 
@@ -81,12 +81,31 @@ Ctrl7 <- CtrlGroup$CTRL_LFC_7 * keepOrNot(CtrlGroup$CTRL_Alpha_7, threshold = ou
 Ctrl8 <- CtrlGroup$CTRL_LFC_8 * keepOrNot(CtrlGroup$CTRL_Alpha_8, threshold = ourThreshold)
 
 length(Exp1)
-LFCTable <- cbind(ExpGroup$Gene, Exp1,Exp2,Exp3,Ctrl1,Ctrl2,Ctrl3,Ctrl4,Ctrl5,Ctrl6,Ctrl7,Ctrl8) 
+LFCTable <- cbind(Exp1,Exp2,Exp3,Ctrl1,Ctrl2,Ctrl3,Ctrl4,Ctrl5,Ctrl6,Ctrl7,Ctrl8) 
 
 dim(LFCTable)
-colnames(LFCTable) <- c('Gene', 'Exp_1','Exp_2','Exp_3','Ctrl_1','Ctrl_2','Ctrl_3','Ctrl_4','Ctrl_5','Ctrl_6','Ctrl_7','Ctrl_8')
+colnames(LFCTable) <- c('Exp_1','Exp_2','Exp_3','Ctrl_1','Ctrl_2','Ctrl_3','Ctrl_4','Ctrl_5','Ctrl_6','Ctrl_7','Ctrl_8')
+rownames(LFCTable) <- ExpGroup$Gene
+
 LFCTable[is.na(LFCTable)] <- 0
-write.csv(LFCTable, file='Phase_2_Result/Filtered_LFC_Result.csv', row.names = FALSE)
+
+# 
+# upRegLFCTable <- ifelse(LFCTable > 0, LFCTable, 0 )
+# ConvertedUpRegLFCTable <- floor(2^upRegLFCTable * 1000)
+# 
+
+NormalizeLFCNumber <- function(x){
+  return(x-min(x))
+}
+
+normalizedLFCTable <- apply(LFCTable,2, NormalizeLFCNumber)
+summary(normalizedLFCTable)
+
+convertedLFCTable <- normalizedLFCTable
+summary(convertedLFCTable)
+
+write.csv(LFCTable, file='Phase_2_Result/Filtered_LFC_Result.csv', row.names = TRUE)
+write.csv(convertedLFCTable, file='Phase_2_Result/convertedLFC_Result.csv', row.names = TRUE)
 LFCTable <- as.data.frame(LFCTable, stringsAsFactors = FALSE)
 
 ```
