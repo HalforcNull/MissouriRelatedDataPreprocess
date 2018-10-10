@@ -55,7 +55,7 @@ sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', '
 
 2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
 ```{r}
-ourThreshold <- 0.1
+ourThreshold <- 0.05
 keepOrNot <- function(alpha, threshold){
   return(
     ifelse(is.na(alpha), 
@@ -111,8 +111,38 @@ LFCTable <- as.data.frame(LFCTable, stringsAsFactors = FALSE)
 ```
 
 
-### all up gre in EXP
+### all zero LFC
 ```{r}
-which(LFCTable$)
+dim(LFCTable)
+result <- apply(LFCTable,1, function(x){all(x==0)})
+
+sum(result)
+```
+
+### T-test on all data
+```{r}
+matrixLFC <- as.matrix(LFCTable)
+colnames(matrixLFC) <- NULL
+rownames(matrixLFC) <- NULL
+runTTest <- function(x){
+  return(t.test(x[1:3], x[4:11] )$p.value)
+}
+
+tTestResult <- apply(matrixLFC, 1, runTTest)
+
+sum(tTestResult<0.05, na.rm = TRUE)
+
+ss <- t.test(x[1:3], x[4:11])
+ss$statistic
 
 ```
+
+
+
+### Different direction of express in between groups
+```{r}
+sameInExp <- apply(LFCTable,1, function(x){ all(x[1:3] > 0) && all(x[4:11] < 0) ||all(x[1:3] < 0) && all(x[4:11] > 0) }                  )
+```
+
+
+###
