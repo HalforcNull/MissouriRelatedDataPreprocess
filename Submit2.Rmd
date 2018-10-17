@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
-### Read data
+# Read data
 ```{r}
 allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv", stringsAsFactors = FALSE)
 colnames(allDegResult)
@@ -18,8 +18,8 @@ colnames(allDegResult)
 
 
 
-### Preprocess
-1. Regroup
+# Preprocess
+## 1. Regroup
 ```{r}
 allNames <- colnames(allDegResult)
 expGroupNames <- c( 'XPC3TR.XPC3NT___log2FoldChange', 
@@ -53,7 +53,7 @@ sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', '
 
 ```
 
-2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
+## 2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
 ```{r}
 ourThreshold <- 0.5
 keepOrNot <- function(alpha, threshold){
@@ -119,9 +119,17 @@ result <- apply(LFCTable,1, function(x){all(x==0)})
 sum(result)
 ```
 
-## 
+## Test
 
-For each gene, assume the gene LFC can only be picked in one of two ditributions. Then the chance of having Exp_1~Exp_3 from one group and Ctrl_1~Ctrl_8 from the other group is $\frac{2}{2^{11}}$. 
+### Some combination knowledge
+
+For each gene, assume the gene LFC can only be picked from one of two distributions. 
+
+Then the chance of having Exp_1~Exp_3 from one group and Ctrl_1~Ctrl_8 from the other group is $\frac{2}{2^{11}}$. 
+
+Note 1: Only two distributions exist is already a very strong requirement. The more distributions we have, the lower above chance is.
+
+Note 2: The mean of this two distribution may have same sign, which means the LFC can both positive or negative in these two groups.
 
 ### Different direction of express in between groups
 The ideal case is:
@@ -169,11 +177,74 @@ ExpGroup$Gene[which(tTestResult<0.05)]
 ```
 
 
-
+Using Gage do pathway analysis
 ```{r}
+library(gage)
+library(gageData)
+library("org.Hs.eg.db")
+#dim(LFCTable)
+dfLFCTable <- as.numeric( rowMeans(LFCTable[,1:3]) - rowMeans(LFCTable[,4:11]) )
+#dim(dfLFCTable)
+names(dfLFCTable) = mapIds(org.Hs.eg.db,
+                     keys=row.names(LFCTable), 
+                     column="ENTREZID",
+                     keytype="ENSEMBL",
+                     multiVals="first")
 
 
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
 
+kres = gage(dfLFCTable, gsets=kegg.sets.hs, same.dir=TRUE)
+lapply(kres, head)
 
+k_pathways_Up = data.frame(id=rownames(kres$greater), kres$greater) %>% 
+  tbl_df() %>% 
+  filter(row_number()<=5) %>% 
+  .$id %>% 
+  as.character()
 
+k_pathways_Down = data.frame(id=rownames(kres$less), kres$less) %>% 
+  tbl_df() %>% 
+  filter(row_number()<=5) %>% 
+  .$id %>% 
+  as.character()
+
+k_Up_ids = unique(substr(k_pathways_Up, start=1, stop=8))
+k_Down_ids = unique(substr(k_pathways_Down, start=1, stop=8))
+k_Up_ids
+k_Down_ids
 ```
+
+## Do pathway view
+```{r}
+library(pathview)
+```
+
+
+### Up regulated pathways
+```{r, message = FALSE, warning=FALSE, eval=FALSE}
+pathview(gene.data=dfLFCTable, pathway.id=upid, species="hsa", kegg.dir = "PathviewResult/Up/", new.signature=FALSE)
+```
+
+![hsa03030](.\hsa03030.pathview.png)
+![hsa04110](.\hsa04110.pathview.png)
+![hsa04114](.\hsa04114.pathview.png)
+![hsa03440](.\hsa03440.pathview.png)
+![hsa03410](.\hsa03410.pathview.png)
+
+### Down regulated pathways
+```{r, message = FALSE, , warning=FALSE, eval=FALSE}
+pathview(gene.data=dfLFCTable, pathway.id=k_Down_ids, species="hsa", kegg.dir = "PathviewResult/Down/", new.signature=FALSE)
+```
+![hsa04141](.\hsa04141.pathview.png)
+![hsa03060](.\hsa03060.pathview.png)
+![hsa04370](.\hsa04370.pathview.png)
+![hsa04330](.\hsa04330.pathview.png)
+![hsa03008](.\hsa03008.pathview.png)
+
+
+
+
+
