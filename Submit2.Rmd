@@ -55,7 +55,7 @@ sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', '
 
 2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
 ```{r}
-ourThreshold <- 0.05
+ourThreshold <- 0.5
 keepOrNot <- function(alpha, threshold){
   return(
     ifelse(is.na(alpha), 
@@ -119,7 +119,39 @@ result <- apply(LFCTable,1, function(x){all(x==0)})
 sum(result)
 ```
 
-### T-test on all data
+## 
+
+For each gene, assume the gene LFC can only be picked in one of two ditributions. Then the chance of having Exp_1~Exp_3 from one group and Ctrl_1~Ctrl_8 from the other group is $\frac{2}{2^{11}}$. 
+
+### Different direction of express in between groups
+The ideal case is:
+
+1.  Exp group all up, Ctrl group all down; or 
+
+2.  Exp group all down, Ctrl group all up
+
+```{r}
+sameInExpUpCtrlDownOrKeep <- apply(LFCTable,1, function(x){ all(x[1:3] > 0) && all(x[4:11] <= 0) } )
+sameInExpUpOrKeepCtrlDown <- apply(LFCTable,1, function(x){ all(x[1:3] >= 0) && all(x[4:11] < 0) } )
+sameInExpDownCtrlUpOrKeep <- apply(LFCTable,1, function(x){ all(x[1:3] < 0) && all(x[4:11] >= 0) } )
+sameInExpDownOrKeepCtrlUp <- apply(LFCTable,1, function(x){ all(x[1:3] <= 0) && all(x[4:11] > 0) } )
+
+names(sameInExpUpOrKeepCtrlDown) = NULL
+names(sameInExpUpCtrlDownOrKeep) = NULL
+names(sameInExpDownCtrlUpOrKeep) = NULL
+names(sameInExpDownOrKeepCtrlUp) = NULL
+
+which(sameInExpUpOrKeepCtrlDown == TRUE) 
+which(sameInExpUpCtrlDownOrKeep == TRUE)
+which(sameInExpDownCtrlUpOrKeep == TRUE) 
+which(sameInExpDownOrKeepCtrlUp == TRUE) 
+```
+
+
+Here we can see, none of those genes follow the ideal case.
+
+### T.test
+
 ```{r}
 matrixLFC <- as.matrix(LFCTable)
 colnames(matrixLFC) <- NULL
@@ -127,22 +159,21 @@ rownames(matrixLFC) <- NULL
 runTTest <- function(x){
   return(t.test(x[1:3], x[4:11] )$p.value)
 }
-
 tTestResult <- apply(matrixLFC, 1, runTTest)
-
 sum(tTestResult<0.05, na.rm = TRUE)
 
-ss <- t.test(x[1:3], x[4:11])
-ss$statistic
+length(tTestResult)
+ExpGroup$Gene[which(tTestResult<0.05)]
+
 
 ```
 
 
 
-### Different direction of express in between groups
 ```{r}
-sameInExp <- apply(LFCTable,1, function(x){ all(x[1:3] > 0) && all(x[4:11] < 0) ||all(x[1:3] < 0) && all(x[4:11] > 0) }                  )
+
+
+
+
+
 ```
-
-
-###
