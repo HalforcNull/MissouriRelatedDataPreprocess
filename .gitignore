@@ -34,3 +34,4 @@ Deliver Package/Missouri Data Source Target Cell Line Overall Report/Down Gene L
 Import Kallisto Data/ImportKallistoTest/ui.R
 Import Kallisto Data/ImportKallistoTest/server.R
 checklistsolution/app.R
+PathviewResult/*
