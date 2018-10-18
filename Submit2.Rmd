@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
-# Read data
+# 0. Read data
 ```{r}
 allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv", stringsAsFactors = FALSE)
 colnames(allDegResult)
@@ -18,8 +18,8 @@ colnames(allDegResult)
 
 
 
-# Preprocess
-## 1. Regroup
+# 1. Preprocess
+## 1.1 Regroup
 ```{r}
 allNames <- colnames(allDegResult)
 expGroupNames <- c( 'XPC3TR.XPC3NT___log2FoldChange', 
@@ -53,7 +53,7 @@ sampleNames.Ctrl <- c('184A1', 'C32', 'CCD18', 'HEM', 'HT29', 'hTERT', 'PANC', '
 
 ```
 
-## 2. In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
+## 1.2 In each cell-line, for each gene, if adj-alpha value is < threshold, then keep LFC otherwise set LFC = 0
 ```{r}
 ourThreshold <- 0.5
 keepOrNot <- function(alpha, threshold){
@@ -119,9 +119,9 @@ result <- apply(LFCTable,1, function(x){all(x==0)})
 sum(result)
 ```
 
-## Test
+#2. Test
 
-### Some combination knowledge
+##2.1 Some basic calculation
 
 For each gene, assume the gene LFC can only be picked from one of two distributions. 
 
@@ -131,7 +131,7 @@ Note 1: Only two distributions exist is already a very strong requirement. The m
 
 Note 2: The mean of this two distribution may have same sign, which means the LFC can both positive or negative in these two groups.
 
-### Different direction of express in between groups
+##2.2 Different direction of express in between groups
 The ideal case is:
 
 1.  Exp group all up, Ctrl group all down; or 
@@ -158,7 +158,7 @@ which(sameInExpDownOrKeepCtrlUp == TRUE)
 
 Here we can see, none of those genes follow the ideal case.
 
-### T.test
+##2.3 T.test
 
 ```{r}
 matrixLFC <- as.matrix(LFCTable)
@@ -177,7 +177,8 @@ ExpGroup$Gene[which(tTestResult<0.05)]
 ```
 
 
-Using Gage do pathway analysis
+# 3. Pathway analysis
+## 3.1 Using Gage do pathway analysis
 ```{r}
 library(gage)
 library(gageData)
@@ -217,13 +218,16 @@ k_Up_ids
 k_Down_ids
 ```
 
-## Do pathway view
+##3.2 Do pathway view
 ```{r}
 library(pathview)
 ```
 
 
 ### Up regulated pathways
+The following pathways up regulated more or down regulated less in PC3, PC3M, MCF7 than in the other cell lines.
+
+
 ```{r, message = FALSE, warning=FALSE, eval=FALSE}
 pathview(gene.data=dfLFCTable, pathway.id=upid, species="hsa", kegg.dir = "PathviewResult/Up/", new.signature=FALSE)
 ```
@@ -235,6 +239,9 @@ pathview(gene.data=dfLFCTable, pathway.id=upid, species="hsa", kegg.dir = "Pathv
 ![hsa03410](.\hsa03410.pathview.png)
 
 ### Down regulated pathways
+
+The following pathways up regulated less or down regulated more in PC3, PC3M, MCF7 than in the other cell lines.
+
 ```{r, message = FALSE, , warning=FALSE, eval=FALSE}
 pathview(gene.data=dfLFCTable, pathway.id=k_Down_ids, species="hsa", kegg.dir = "PathviewResult/Down/", new.signature=FALSE)
 ```
@@ -243,6 +250,109 @@ pathview(gene.data=dfLFCTable, pathway.id=k_Down_ids, species="hsa", kegg.dir = 
 ![hsa04370](.\hsa04370.pathview.png)
 ![hsa04330](.\hsa04330.pathview.png)
 ![hsa03008](.\hsa03008.pathview.png)
+
+
+
+##3.3 Gage Analysis using GO
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+GoLFC = dfLFCTable
+
+gobpsets = go.sets.hs[go.subs.hs$BP]
+goccsets = go.sets.hs[go.subs.hs$CC]
+gomfsets = go.sets.hs[go.subs.hs$MF]
+
+gobpres <- gage(GoLFC, gsets=gobpsets, same.dir=TRUE)
+goccres <- gage(GoLFC, gsets=goccsets, same.dir=TRUE)
+gomfres <- gage(GoLFC, gsets=gomfsets, same.dir=TRUE)
+
+```
+
+### bp result
+
+```{r}
+
+lapply(gobpres, head)
+```
+
+### cc result
+```{r}
+lapply(goccres, head)
+```
+
+### mf result
+
+```{r}
+lapply(gomfres, head)
+```
+
+
+# 4. Classification
+Goal: Given a new cell line, we can tell whether it is treatable by the new technology.
+
+Training data: recount of the control group of each cell line.
+
+Group rule: 
+1. MCF7 PC3 PC3M are grouped as 'Treatable' group.
+2. The other cell lines are grouped as 'Un-Treatable' group.
+
+
+## 4.1 Linear Classification
+
+Linear classification solutions are very limited in this case due to the size of training data and the dimision of the variables.
+
+## 4.2 SVM
+
+Since we have only two classes, we can try using SVM to do the classification.
+
+
+### All model
+```{r}
+library(e1071)
+library(dplyr)
+allRead <- read.csv( 'AllReadCount.csv' )
+tblTreatable <- allRead %>% select(one_of(c( "MCF7NT1", "MCF7NT2", "MCF7NT3", "PC3NT1", "PC3NT2", "PC3NT3", "PC3MNT1", "PC3MNT2", "PC3MNT3" ) ) )
+tblUnTreatable <- allRead %>% select(one_of(c( "X184A1NT1", "X184A1NT2", "X184A1NT3", "C32NT1", "C32NT2", "C32NT3", "CCD18NT1", "CCD18NT2", "CCD18NT3", "HEMNT1", "HEMNT2", "HEMNT3", "HT29NT1", "HT29NT2", "HT29NT3", "PANCNT1", "PANCNT2", "PANCNT3", "RWNT1", "RWNT2", "RWNT3", "hTERTNT1", "hTERTNT2", "hTERTNT3" ) ) )
+tlabels <- as.factor( c(rep('Treatable', 9), rep('UnTreatable', 24)) )
+ttraining <- cbind( tblTreatable, tblUnTreatable )
+ttraining <- t(ttraining)
+
+svm.model <- svm(ttraining, tlabels)
+pre.label <- predict(svm.model, ttraining)
+sum(pre.label == tlabels) 
+```
+
+We got all result correct. But it must because somekind of overfitting. 
+Try take one out verification
+
+### 1 out verification
+```{r}
+success = 0
+for( i in 1:nrow(ttraining) ){
+  tmp.training <- ttraining[-i,]
+  tmp.tlabels <- tlabels[-i]
+
+  tmp.testing <-  ttraining[i,]
+  tmp.testinglable <- tlabels[i]
+  tmp.svm.model <- svm(tmp.training, tmp.tlabels)
+
+  tmp.pre.label <- predict(tmp.svm.model, t(as.matrix(tmp.testing, nrow = 1)))
+  if(tmp.pre.label == tmp.testinglable)
+  {
+    success = success + 1
+  }
+}
+success
+```
+
+
+
+
+
+
+
+
 
 
 
