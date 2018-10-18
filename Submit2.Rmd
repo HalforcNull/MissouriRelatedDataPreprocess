@@ -329,6 +329,7 @@ Try take one out verification
 ### 1 out verification
 ```{r}
 success = 0
+predictedResult <- NULL
 for( i in 1:nrow(ttraining) ){
   tmp.training <- ttraining[-i,]
   tmp.tlabels <- tlabels[-i]
@@ -338,13 +339,18 @@ for( i in 1:nrow(ttraining) ){
   tmp.svm.model <- svm(tmp.training, tmp.tlabels)
 
   tmp.pre.label <- predict(tmp.svm.model, t(as.matrix(tmp.testing, nrow = 1)))
+  predictedResult = c(predictedResult, tmp.pre.label)
   if(tmp.pre.label == tmp.testinglable)
   {
     success = success + 1
   }
 }
 success
+predictedResult
+tlabels
 ```
+
+By taking one out, we got 24 correct. 
 
 
 
