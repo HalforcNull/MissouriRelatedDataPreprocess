@@ -10,6 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
+
+# Goal
+1. Do pathway analysis based on target cell lines (treatable cell lines) and other cell lines (untreatable cell lines).
+2. Try find a model to classify the treatable cell lines vs. untreatable cell lines.
+
+
 # 0. Read data
 ```{r}
 allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv", stringsAsFactors = FALSE)
@@ -308,12 +314,14 @@ Since we have only two classes, we can try using SVM to do the classification.
 
 
 ### All model
-```{r}
+```{r, message = FALSE, warning=FALSE}
 library(e1071)
 library(dplyr)
 allRead <- read.csv( 'AllReadCount.csv' )
-tblTreatable <- allRead %>% select(one_of(c( "MCF7NT1", "MCF7NT2", "MCF7NT3", "PC3NT1", "PC3NT2", "PC3NT3", "PC3MNT1", "PC3MNT2", "PC3MNT3" ) ) )
-tblUnTreatable <- allRead %>% select(one_of(c( "X184A1NT1", "X184A1NT2", "X184A1NT3", "C32NT1", "C32NT2", "C32NT3", "CCD18NT1", "CCD18NT2", "CCD18NT3", "HEMNT1", "HEMNT2", "HEMNT3", "HT29NT1", "HT29NT2", "HT29NT3", "PANCNT1", "PANCNT2", "PANCNT3", "RWNT1", "RWNT2", "RWNT3", "hTERTNT1", "hTERTNT2", "hTERTNT3" ) ) )
+tblTreatable <- allRead %>% 
+  dplyr::select(one_of(c( "MCF7NT1", "MCF7NT2", "MCF7NT3", "PC3NT1", "PC3NT2", "PC3NT3", "PC3MNT1", "PC3MNT2", "PC3MNT3" ) ) )
+tblUnTreatable <- allRead %>% 
+  dplyr::select(one_of(c( "X184A1NT1", "X184A1NT2", "X184A1NT3", "C32NT1", "C32NT2", "C32NT3", "CCD18NT1", "CCD18NT2", "CCD18NT3", "HEMNT1", "HEMNT2", "HEMNT3", "HT29NT1", "HT29NT2", "HT29NT3", "PANCNT1", "PANCNT2", "PANCNT3", "RWNT1", "RWNT2", "RWNT3", "hTERTNT1", "hTERTNT2", "hTERTNT3" ) ) )
 tlabels <- as.factor( c(rep('Treatable', 9), rep('UnTreatable', 24)) )
 ttraining <- cbind( tblTreatable, tblUnTreatable )
 ttraining <- t(ttraining)
@@ -326,8 +334,8 @@ sum(pre.label == tlabels)
 We got all result correct. But it must because somekind of overfitting. 
 Try take one out verification
 
-### 1 out verification
-```{r}
+### Take 1 out verification
+```{r, message = FALSE, warning=FALSE}
 success = 0
 predictedResult <- NULL
 for( i in 1:nrow(ttraining) ){
@@ -339,7 +347,7 @@ for( i in 1:nrow(ttraining) ){
   tmp.svm.model <- svm(tmp.training, tmp.tlabels)
 
   tmp.pre.label <- predict(tmp.svm.model, t(as.matrix(tmp.testing, nrow = 1)))
-  predictedResult = c(predictedResult, tmp.pre.label)
+  predictedResult = c(predictedResult, as.character(tmp.pre.label))
   if(tmp.pre.label == tmp.testinglable)
   {
     success = success + 1
@@ -351,8 +359,100 @@ tlabels
 ```
 
 By taking one out, we got 24 correct. 
+But unfortunately, all prediction gave us 'UnTreatable' result. 
 
+### Only use the t.test result genes
+```{r, message = FALSE, warning=FALSE}
+miniTraining <- ttraining[,which(tTestResult<0.05)]
+success = 0
+predictedResult <- NULL
+for( i in 1:nrow(ttraining) ){
+  tmp.training <- miniTraining[-i,]
+  tmp.tlabels <- tlabels[-i]
 
+  tmp.testing <-  miniTraining[i,]
+  tmp.testinglable <- tlabels[i]
+  tmp.svm.model <- svm(tmp.training, tmp.tlabels)
+
+  tmp.pre.label <- predict(tmp.svm.model, t(as.matrix(tmp.testing, nrow = 1)))
+  predictedResult = c(predictedResult, as.character(tmp.pre.label))
+  if(tmp.pre.label == tmp.testinglable)
+  {
+    success = success + 1
+  }
+}
+success
+predictedResult
+tlabels
+```
+
+### Normalization training data, do take one out again
+```{r, message = FALSE, warning=FALSE}
+ttraining <- log(ttraining + 1)
+
+success = 0
+predictedResult <- NULL
+for( i in 1:nrow(ttraining) ){
+  tmp.training <- ttraining[-i,]
+  tmp.tlabels <- tlabels[-i]
+
+  tmp.testing <-  ttraining[i,]
+  tmp.testinglable <- tlabels[i]
+  tmp.svm.model <- svm(tmp.training, tmp.tlabels)
+
+  tmp.pre.label <- predict(tmp.svm.model, t(as.matrix(tmp.testing, nrow = 1)))
+  predictedResult = c(predictedResult, as.character(tmp.pre.label))
+  if(tmp.pre.label == tmp.testinglable)
+  {
+    success = success + 1
+  }
+}
+success
+predictedResult
+tlabels
+```
+
+The result is much better now. 
+
+However, we need test how it works in classify any other cell line.
+
+So we try take a whole cell line out.
+
+### Take a whole cell line out
+```{r, message = FALSE, warning=FALSE}
+success = 0
+predictedResult <- NULL
+for( i in 1:(nrow(ttraining)/3) ){
+  takeOutIndex <- c( (i-1)*3 + 1, (i-1)*3 + 2, (i-1)*3 + 3 )
+  tmp.training <- ttraining[-1 * takeOutIndex,]
+  tmp.tlabels <- tlabels[-1 * takeOutIndex]
+
+  tmp.testing <-  ttraining[takeOutIndex,]
+  tmp.testinglable <- tlabels[takeOutIndex]
+  tmp.svm.model <- svm(tmp.training, tmp.tlabels)
+
+  tmp.pre.label <- predict(tmp.svm.model, tmp.testing)
+  predictedResult = c(predictedResult, as.character(tmp.pre.label))
+  if(tmp.pre.label == tmp.testinglable)
+  {
+    success = success + 1
+  }
+}
+success
+predictedResult
+tlabels
+```
+
+Here we can see the false positive 'UnTreatable' detection rate is high. The 'Treatable' detection does not work well.
+
+Note: 
+
+1. The 2 treatable cell lines that is successfully detected is the PC3 and PC3M. Since they are very similar, take one of the cell line out cannot really say it is working. 
+
+2. This model still able to tell the similarity of cell lines, but it may not a good evidence to determine this new given cell line is treatble or not.
+
+### Conlusion for classification
+SVM model give us some information, but it cannot answer the question we are asking directly.
 
 
 
