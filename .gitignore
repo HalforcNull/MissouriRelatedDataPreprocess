@@ -35,3 +35,5 @@ Import Kallisto Data/ImportKallistoTest/ui.R
 Import Kallisto Data/ImportKallistoTest/server.R
 checklistsolution/app.R
 PathviewResult/*
+.vs/MissouriRelatedDataPreprocess/v15/.suo
+.vs/slnx.sqlite
