@@ -15,7 +15,7 @@ library(dplyr)
 1. Do pathway analysis based on target cell lines (treatable cell lines) and other cell lines (untreatable cell lines).
 2. Try find a model to classify the treatable cell lines vs. untreatable cell lines.
 
-
+`
 # 0. Read data
 ```{r}
 allDegResult <- read.csv("Phase_1_Result/FC FDR of each cell line/AllDEGResult.csv", stringsAsFactors = FALSE)
@@ -26,6 +26,7 @@ colnames(allDegResult)
 
 # 1. Preprocess
 ## 1.1 Regroup
+
 ```{r}
 allNames <- colnames(allDegResult)
 expGroupNames <- c( 'XPC3TR.XPC3NT___log2FoldChange', 
@@ -162,7 +163,7 @@ which(sameInExpDownOrKeepCtrlUp == TRUE)
 ```
 
 
-Here we can see, none of those genes follow the ideal case.
+Here we can see, not many of those genes follow the ideal case.
 
 ##2.3 T.test
 
@@ -181,14 +182,20 @@ ExpGroup$Gene[which(tTestResult<0.05)]
 
 
 ```
+## 2.4 clustering
+```{r}
+dat <- LFCTable[which(tTestResult<0.05),]
 
+```
 
 # 3. Pathway analysis
 ## 3.1 Using Gage do pathway analysis
-```{r}
+```{r setup, include=FALSE}
 library(gage)
 library(gageData)
 library("org.Hs.eg.db")
+```
+```{r}
 #dim(LFCTable)
 dfLFCTable <- as.numeric( rowMeans(LFCTable[,1:3]) - rowMeans(LFCTable[,4:11]) )
 #dim(dfLFCTable)
@@ -225,7 +232,7 @@ k_Down_ids
 ```
 
 ##3.2 Do pathway view
-```{r}
+```{r setup, include=FALSE}
 library(pathview)
 ```
 
@@ -260,9 +267,11 @@ pathview(gene.data=dfLFCTable, pathway.id=k_Down_ids, species="hsa", kegg.dir = 
 
 
 ##3.3 Gage Analysis using GO
-```{r}
+```{r setup, include=FALSE}
 data(go.sets.hs)
 data(go.subs.hs)
+```
+```{r}
 GoLFC = dfLFCTable
 
 gobpsets = go.sets.hs[go.subs.hs$BP]
@@ -314,14 +323,16 @@ Since we have only two classes, we can try using SVM to do the classification.
 
 
 ### All model
-```{r, message = FALSE, warning=FALSE}
+```{r setup, include=FALSE}
 library(e1071)
 library(dplyr)
+```
+```{r, message = FALSE, warning=FALSE}
 allRead <- read.csv( 'AllReadCount.csv' )
 tblTreatable <- allRead %>% 
-  dplyr::select(one_of(c( "MCF7NT1", "MCF7NT2", "MCF7NT3", "PC3NT1", "PC3NT2", "PC3NT3", "PC3MNT1", "PC3MNT2", "PC3MNT3" ) ) )
+  dplyr::select(one_of(c( "MCF7NT1", "MCF7NT2", "MCF7NT3", "PC3NT1", "PC3NT2", "PC3NT3", "PC3MNT1", "PC3MNT2", "PC3MNT3" ) ) )[which(tTestResult<0.05)]
 tblUnTreatable <- allRead %>% 
-  dplyr::select(one_of(c( "X184A1NT1", "X184A1NT2", "X184A1NT3", "C32NT1", "C32NT2", "C32NT3", "CCD18NT1", "CCD18NT2", "CCD18NT3", "HEMNT1", "HEMNT2", "HEMNT3", "HT29NT1", "HT29NT2", "HT29NT3", "PANCNT1", "PANCNT2", "PANCNT3", "RWNT1", "RWNT2", "RWNT3", "hTERTNT1", "hTERTNT2", "hTERTNT3" ) ) )
+  dplyr::select(one_of(c( "X184A1NT1", "X184A1NT2", "X184A1NT3", "C32NT1", "C32NT2", "C32NT3", "CCD18NT1", "CCD18NT2", "CCD18NT3", "HEMNT1", "HEMNT2", "HEMNT3", "HT29NT1", "HT29NT2", "HT29NT3", "PANCNT1", "PANCNT2", "PANCNT3", "RWNT1", "RWNT2", "RWNT3", "hTERTNT1", "hTERTNT2", "hTERTNT3" ) ) )[which(tTestResult<0.05)]
 tlabels <- as.factor( c(rep('Treatable', 9), rep('UnTreatable', 24)) )
 ttraining <- cbind( tblTreatable, tblUnTreatable )
 ttraining <- t(ttraining)
