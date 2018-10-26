@@ -462,9 +462,12 @@ Note:
 
 2. This model still able to tell the similarity of cell lines, but it may not a good evidence to determine this new given cell line is treatble or not.
 
-### Conlusion for classification
+### Conlusion for SVM classification
 SVM model give us some information, but it cannot answer the question we are asking directly.
 
+## 4.3 Random Forest
+
+```{r}
 
 
 
@@ -474,4 +477,4 @@ SVM model give us some information, but it cannot answer the question we are ask
 
 
 
-
+```
